@@ -1,7 +1,10 @@
 <div align="center">
-  
-# Official Dashboard/Website for [DDBench](https://github.com/USC-NSL/DDBench)
+  <img src="assets/logo/ddbench-logo-text.svg" alt="DDBench Logo" />
 
+  <h1>
+    Official Dashboard/Website for
+    <a href="https://github.com/USC-NSL/DDBench">DDBench</a>
+  </h1>
 </div>
 
 
