@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="128" height="128" role="img" aria-label="DDBench">
+  <title>DDBench</title>
+  <path d="M14 5.5 4.5 22.5h19z" fill="none" stroke="#2a78d6" stroke-width="2"/>
+  <circle cx="14" cy="5.5" r="4" fill="#2a78d6"/>
+  <circle cx="4.5" cy="22.5" r="4" fill="#2a78d6"/>
+  <circle cx="23.5" cy="22.5" r="4" fill="#eb6834"/>
+</svg>
