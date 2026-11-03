@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DDBench</title>
+  <meta name="description" content="DDBench is a code-repair benchmark of 60 historical bugs from 13 open-source distributed systems, evaluated with and without debugging context.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c5cab'/%3E%3Cpath d='M16 8 7.5 23h17z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='16' cy='8' r='3.5' fill='%23fff'/%3E%3Ccircle cx='7.5' cy='23' r='3.5' fill='%23fff'/%3E%3Ccircle cx='24.5' cy='23' r='3.5' fill='%23ffb48f'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script>
+    // Apply a saved theme before first paint.
+    try {
+      var savedTheme = localStorage.getItem("ddbench-theme");
+      if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#leaderboard">Skip to the leaderboard</a>
+
+  <nav class="band topnav" aria-label="Main">
+    <div class="wrap topnav-inner">
+      <a class="brand" href="#top">
+        <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+          <path d="M16 7 6.5 24h19z" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="16" cy="7" r="4" fill="currentColor"/>
+          <circle cx="6.5" cy="24" r="4" fill="currentColor"/>
+          <circle cx="25.5" cy="24" r="4" fill="#ffb48f"/>
+        </svg>
+        DDBench
+      </a>
+      <div class="topnav-links">
+        <a href="#leaderboard">Results</a>
+        <a href="#overview">Overview</a>
+        <a href="#findings">Findings</a>
+        <a href="#dataset">Dataset</a>
+        <a href="#run">Run</a>
+      </div>
+      <div class="topnav-actions">
+        <a class="btn-band" data-repo-link="" href="https://github.com/USC-NSL/DDBench">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <button class="btn-band btn-icon" id="theme-toggle" type="button" aria-label="Switch color theme">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="band" id="top">
+    <div class="wrap">
+      <h1 class="band-title">A benchmark for agentic debugging on distributed systems</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap section-tight" id="leaderboard" aria-labelledby="leaderboard-h">
+      <h2 class="visually-hidden" id="leaderboard-h">Leaderboard</h2>
+      <div class="lb-top">
+        <div class="tabs" role="tablist" aria-label="Difficulty tier" id="tier-tabs"></div>
+        <label class="chip">
+          <input type="checkbox" id="open-only">
+          Open-weight only
+        </label>
+      </div>
+      <div class="tier-summary">
+        <p class="tier-blurb" id="tier-blurb"></p>
+        <div class="tier-mean" id="tier-mean"></div>
+      </div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Leaderboard table">
+        <table class="lb" id="lb-table"></table>
+      </div>
+    </section>
+
+    <section class="wrap section-links" aria-label="Project links">
+      <div class="link-row" id="link-row"></div>
+    </section>
+
+    <section class="wrap section" id="overview" aria-labelledby="overview-h">
+      <h2 id="overview-h">Overview</h2>
+      <p class="opener">DDBench tests AI agents' ability to debug distributed systems.</p>
+
+      <div class="teaser" role="group" aria-label="How one case runs, using the raft-268 case as an example">
+        <div class="teaser-col">
+          <div class="panel">
+            <div class="panel-title">
+              <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg>
+              Symptom
+            </div>
+            <p class="panel-quote"><code>Raft.Shutdown()</code> can hang permanently.</p>
+            <div class="panel-title panel-title-next">
+              <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg>
+              Buggy code
+            </div>
+            <code class="panel-code">hashicorp/raft</code>
+          </div>
+          <div class="panel panel-context">
+            <div class="panel-title">
+              <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Debug context
+              <span class="toggle" aria-hidden="true"></span>
+            </div>
+            <code class="panel-code">goroutine-dump.md</code>
+          </div>
+        </div>
+        <div class="teaser-arrow" aria-hidden="true"></div>
+        <div class="panel panel-agent">
+          <div class="panel-title">
+            <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 8V4M9 13h.01M15 13h.01M9 16h6"/></svg>
+            Agent + model
+          </div>
+          <code class="panel-code">mini-SWE-agent</code>
+          <div class="panel-tags"><span>450 steps</span><span>$5</span><span>30 min</span></div>
+        </div>
+        <div class="teaser-arrow" aria-hidden="true"></div>
+        <div class="panel">
+          <div class="panel-title">
+            <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v10M3 9h10M4 19h9M16 5l5 5-5 5"/></svg>
+            Patch
+          </div>
+          <div class="diffstat"><span class="add">+10</span> <span class="del">&minus;4</span></div>
+          <code class="panel-code">future.go</code>
+          <code class="panel-code">snapshot.go</code>
+        </div>
+        <div class="teaser-arrow" aria-hidden="true"></div>
+        <div class="panel">
+          <div class="panel-title">
+            <svg class="panel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+            Hidden oracle
+          </div>
+          <code class="panel-code">reproduce.sh</code>
+          <div class="verdicts">
+            <div><span>Before</span><b class="verdict fail">FAIL</b></div>
+            <div><span>After</span><b class="verdict pass">PASS</b></div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="steps">
+        <div><dt>Collect</dt><dd>We collect 60 historical bugs, confirmed and fixed upstream, from 13 open-source distributed systems.</dd></div>
+        <div><dt>Build</dt><dd>Each case pins the buggy commit in Docker, with a symptom report, debug context, and a hidden oracle that fails before the fix and passes after.</dd></div>
+        <div><dt>Evaluate</dt><dd>An agent gets the symptom and code, with or without the debug context, and passes if the oracle reports PASS on its patch.</dd></div>
+      </dl>
+    </section>
+
+    <section class="wrap section" id="findings" aria-labelledby="findings-h">
+      <h2 id="findings-h">Findings</h2>
+
+      <div class="finding-grid">
+        <figure class="chart-card">
+          <figcaption>Models that cluster on SWE-bench spread apart here.</figcaption>
+          <div class="legend" id="chart-cross-legend"></div>
+          <div class="chart" id="chart-cross"></div>
+          <div class="card-foot" id="chart-cross-table"></div>
+        </figure>
+
+        <figure class="chart-card">
+          <figcaption>Context lifts weak models and cuts cost for strong ones.</figcaption>
+          <div class="legend" id="chart-pareto-legend"></div>
+          <div class="chart" id="chart-pareto"></div>
+          <div class="card-foot" id="chart-pareto-table"></div>
+        </figure>
+
+        <figure class="chart-card">
+          <figcaption>Context helps more on harder tiers.</figcaption>
+          <div class="legend" id="chart-lift-legend"></div>
+          <div class="chart-head">Gain (pp)</div>
+          <div class="chart" id="chart-lift-tier"></div>
+          <div class="card-foot" id="chart-lift-table"></div>
+        </figure>
+
+        <figure class="chart-card">
+          <figcaption>With context, agents search less.</figcaption>
+          <div class="legend" id="behaviour-legend"></div>
+          <div class="tiles" id="behaviour-tiles"></div>
+          <div class="card-foot" id="behaviour-table"></div>
+        </figure>
+      </div>
+
+      <figure class="chart-card chart-card-wide">
+        <figcaption>Context fixes far more runs than it breaks.</figcaption>
+        <div class="outcome-key" id="heatmap-legend"></div>
+        <div class="table-scroll heatmap-scroll" tabindex="0" role="region" aria-label="Per-case outcome grid">
+          <table class="heatmap" id="heatmap"></table>
+        </div>
+      </figure>
+    </section>
+
+    <section class="wrap section" id="dataset" aria-labelledby="dataset-h">
+      <h2 id="dataset-h">Dataset</h2>
+      <div class="legend legend-large" id="dataset-legend"></div>
+      <div class="dataset-grid">
+        <div class="dataset-col">
+          <figure class="chart-card">
+            <figcaption>By bug family</figcaption>
+            <div class="chart" id="chart-families"></div>
+            <div class="card-foot" id="chart-families-table"></div>
+          </figure>
+          <figure class="chart-card">
+            <figcaption>By language</figcaption>
+            <div class="chart" id="chart-languages"></div>
+            <div class="card-foot" id="chart-languages-table"></div>
+          </figure>
+        </div>
+        <figure class="chart-card">
+          <figcaption>By system</figcaption>
+          <div class="chart" id="chart-systems"></div>
+          <div class="card-foot" id="chart-systems-table"></div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="wrap section" id="compare-section" aria-labelledby="compare-h">
+      <h2 id="compare-h">Compared with other benchmarks</h2>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark comparison">
+        <table class="compare" id="compare"></table>
+      </div>
+    </section>
+
+    <section class="wrap section" id="run" aria-labelledby="run-h">
+      <h2 id="run-h">Run a case</h2>
+      <div class="code-block">
+        <div class="code-head">
+          <span>Quick start</span>
+          <button class="copy-btn" type="button" id="copy-code">Copy</button>
+        </div>
+<pre><code id="quickstart">git clone https://github.com/USC-NSL/DDBench &amp;&amp; cd DDBench
+
+<span class="c"># Build a case and confirm the bug</span>
+./bench.sh setup raft-358-negative-log-range
+./bench.sh reproduce raft-358-negative-log-range
+
+<span class="c"># Run the agent (add --context for debug context)</span>
+./bench.sh agent raft-358-negative-log-range --addon mini-swe-agent \
+    --prompt "Fix the bug in SYMPTOM.md" \
+    --config harness/configs/ddbench_prompt.yaml --output-dir out/
+
+<span class="c"># Score a patch</span>
+./bench.sh eval raft-358-negative-log-range --patch my-fix.diff --json result.json</code></pre>
+      </div>
+      <a class="link-btn run-guide" data-repo-path="blob/main/README.md" href="#">Full guide</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>Apache-2.0</span>
+      <span class="footer-links">
+        <a data-repo-link="" href="https://github.com/USC-NSL/DDBench">GitHub</a>
+        <span id="footer-paper"></span>
+      </span>
+    </div>
+  </footer>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/data-cases.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
