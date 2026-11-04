@@ -1,5 +1,6 @@
 // Every number on the site comes from this file (plus data-cases.js).
 // Source is the NeurIPS 2026 version of the DDBench paper unless a comment says otherwise.
+// After editing, run `node scripts/prerender.js` to refresh the copy of the results in index.html.
 window.DDBENCH = {
   repo: "https://github.com/USC-NSL/DDBench",
   branch: "main",

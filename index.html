@@ -3,8 +3,44 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DDBench</title>
-  <meta name="description" content="DDBench is a code-repair benchmark of 60 historical bugs from 13 open-source distributed systems, evaluated with and without debugging context.">
+  <title>DDBench: A Benchmark for Agentic Debugging on Distributed Systems</title>
+  <meta name="description" content="DDBench tests AI agents on 60 real bugs from 13 open-source distributed systems, with and without debugging context. See how 10 models compare.">
+  <!-- If the site address changes, update it in the canonical link, og:url, og:image and the JSON-LD url. -->
+  <link rel="canonical" href="https://nsl.usc.edu/ddbench-site/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DDBench">
+  <meta property="og:title" content="DDBench: A Benchmark for Agentic Debugging on Distributed Systems">
+  <meta property="og:description" content="DDBench tests AI agents on 60 real bugs from 13 open-source distributed systems, with and without debugging context. See how 10 models compare.">
+  <meta property="og:url" content="https://nsl.usc.edu/ddbench-site/">
+  <meta property="og:image" content="https://nsl.usc.edu/ddbench-site/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="DDBench logo with 60 bugs, 13 systems and 10 models.">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "DDBench",
+    "alternateName": "DDBench: A Benchmark for Agentic Debugging on Distributed Systems",
+    "description": "DDBench is a code-repair benchmark for AI agents: 60 historical bugs from 13 open-source distributed systems (Dragonfly, NATS, Kvrocks, etcd, hashicorp/raft, Consul, Kafka, ZooKeeper, BookKeeper, raft-rs, Ra, RabbitMQ and RocksDB), split into three difficulty tiers. Each case is evaluated with and without debugging context, using a hidden oracle that fails before the fix and passes after.",
+    "url": "https://nsl.usc.edu/ddbench-site/",
+    "sameAs": "https://github.com/USC-NSL/DDBench",
+    "citation": "https://arxiv.org/abs/2608.14863",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "isAccessibleForFree": true,
+    "keywords": ["AI agents", "LLM evaluation", "code repair", "debugging", "distributed systems", "benchmark"],
+    "creator": [
+      { "@type": "Person", "name": "Yibo Yan" },
+      { "@type": "Person", "name": "Huijuan Wang" },
+      { "@type": "Person", "name": "Junzhou He" },
+      { "@type": "Person", "name": "Yizhuo Liang" },
+      { "@type": "Person", "name": "Shaoyu Wang" },
+      { "@type": "Person", "name": "Huanchen Sun" },
+      { "@type": "Person", "name": "Seo Jin Park" }
+    ]
+  }
+  </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c5cab'/%3E%3Cpath d='M16 8 7.5 23h17z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='16' cy='8' r='3.5' fill='%23fff'/%3E%3Ccircle cx='7.5' cy='23' r='3.5' fill='%23fff'/%3E%3Ccircle cx='24.5' cy='23' r='3.5' fill='%23ffb48f'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,23 +97,34 @@
     <section class="wrap section-tight" id="leaderboard" aria-labelledby="leaderboard-h">
       <h2 class="visually-hidden" id="leaderboard-h">Leaderboard</h2>
       <div class="lb-top">
-        <div class="tabs" role="tablist" aria-label="Difficulty tier" id="tier-tabs"></div>
+        <div class="tabs" role="tablist" aria-label="Difficulty tier" id="tier-tabs"><button class="tab" role="tab" type="button" id="tab-tier1" aria-selected="true" aria-controls="lb-table" tabindex="0">Tier 1<small><span class="label-long">31 cases</span><span class="label-short">31</span></small></button><button class="tab" role="tab" type="button" id="tab-tier2" aria-selected="false" aria-controls="lb-table" tabindex="-1">Tier 2<small><span class="label-long">15 cases</span><span class="label-short">15</span></small></button><button class="tab" role="tab" type="button" id="tab-tier3" aria-selected="false" aria-controls="lb-table" tabindex="-1">Tier 3<small><span class="label-long">14 cases</span><span class="label-short">14</span></small></button></div>
         <label class="chip">
           <input type="checkbox" id="open-only">
           Open-weight only
         </label>
       </div>
       <div class="tier-summary">
-        <p class="tier-blurb" id="tier-blurb"></p>
-        <div class="tier-mean" id="tier-mean"></div>
+        <p class="tier-blurb" id="tier-blurb">Hardest: bugs that cross nodes and depend on timing.</p>
+        <div class="tier-mean" id="tier-mean"><span class="mean-val"><i class="key-dot" style="background:var(--sym)"></i>31.0%</span><span class="mean-arrow" aria-hidden="true">→</span><span class="mean-val"><i class="key-dot" style="background:var(--ctx)"></i>50.0%</span><span class="mean-gain good">+19.0 pp</span><span class="mean-label">average pass rate</span></div>
       </div>
       <div class="table-scroll" tabindex="0" role="region" aria-label="Leaderboard table">
-        <table class="lb" id="lb-table"></table>
+        <table class="lb" id="lb-table"><thead><tr><th class="left sticky-a" scope="col">#</th><th class="left sticky-b" scope="col">Model</th><th class="left agent-col" scope="col">Agent</th><th scope="col" aria-sort="descending"><button class="sort-btn" type="button"><i class="key-dot" style="background:var(--sym)"></i><span class="label-long">Symptom-only</span><span class="label-short">Sym.</span><span class="caret" aria-hidden="true">▼</span></button></th><th scope="col"><button class="sort-btn" type="button"><i class="key-dot" style="background:var(--ctx)"></i><span class="label-long">+ Context</span><span class="label-short">+ Ctx</span><span class="caret" aria-hidden="true"></span></button></th><th scope="col"><button class="sort-btn" type="button"><span class="label-long">Gain (pp)</span><span class="label-short">Gain</span><span class="caret" aria-hidden="true"></span></button></th><th scope="col"><button class="sort-btn" type="button"><span class="label-long">Total cost</span><span class="label-short">Cost</span><span class="caret" aria-hidden="true"></span></button></th><th scope="col"><button class="sort-btn" type="button"><span class="label-long">Cost change</span><span class="label-short">Change</span><span class="caret" aria-hidden="true"></span></button></th></tr>
+</thead><tbody><tr><td class="left rank sticky-a">1</td><th class="left sticky-b model-th" scope="row"><span class="model-name">Claude Opus 4.6</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">API, thinking adaptive high</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">51.6</span><span class="bar bar-sym"><span style="width:51.6%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">64.5</span><span class="bar bar-ctx"><span style="width:64.5%"></span></span></div></td><td><span class="good">+12.9</span></td><td><span class="cost-from">$72.5</span><span class="cost-arrow" aria-hidden="true">→</span>$32.6</td><td><span class="good">−55.1%</span></td></tr>
+<tr><td class="left rank sticky-a">2</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GPT 5.4 mini</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">API, thinking high</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">45.2</span><span class="bar bar-sym"><span style="width:45.2%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">61.3</span><span class="bar bar-ctx"><span style="width:61.3%"></span></span></div></td><td><span class="good">+16.1</span></td><td><span class="cost-from">$7.9</span><span class="cost-arrow" aria-hidden="true">→</span>$6.1</td><td><span class="good">−23.5%</span></td></tr>
+<tr><td class="left rank sticky-a">3</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GPT 5.4</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">API, thinking high</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">41.9</span><span class="bar bar-sym"><span style="width:41.9%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">67.7</span><span class="bar bar-ctx"><span style="width:67.7%"></span></span></div></td><td><span class="good">+25.8</span></td><td><span class="cost-from">$25.0</span><span class="cost-arrow" aria-hidden="true">→</span>$21.4</td><td><span class="good">−14.3%</span></td></tr>
+<tr><td class="left rank sticky-a">3</td><th class="left sticky-b model-th" scope="row"><span class="model-name">Claude Sonnet 4.6</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">API, thinking adaptive high</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">41.9</span><span class="bar bar-sym"><span style="width:41.9%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">58.1</span><span class="bar bar-ctx"><span style="width:58.1%"></span></span></div></td><td><span class="good">+16.1</span></td><td><span class="cost-from">$71.8</span><span class="cost-arrow" aria-hidden="true">→</span>$35.8</td><td><span class="good">−50.1%</span></td></tr>
+<tr><td class="left rank sticky-a">4</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GLM 5.1 (FP8)</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, self-hosted, thinking enabled</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">32.3</span><span class="bar bar-sym"><span style="width:32.3%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">48.4</span><span class="bar bar-ctx"><span style="width:48.4%"></span></span></div></td><td><span class="good">+16.1</span></td><td><span class="cost-from">$23.1</span><span class="cost-arrow" aria-hidden="true">→</span>$14.6</td><td><span class="good">−36.7%</span></td></tr>
+<tr><td class="left rank sticky-a">4</td><th class="left sticky-b model-th" scope="row"><span class="model-name">Kimi K2.5</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, API, thinking n/a</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">32.3</span><span class="bar bar-sym"><span style="width:32.3%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">38.7</span><span class="bar bar-ctx"><span style="width:38.7%"></span></span></div></td><td><span class="good">+6.5</span></td><td><span class="cost-from">$11.2</span><span class="cost-arrow" aria-hidden="true">→</span>$7.5</td><td><span class="good">−32.6%</span></td></tr>
+<tr><td class="left rank sticky-a">5</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GLM 5</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, API, thinking enabled</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">29.0</span><span class="bar bar-sym"><span style="width:29%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">45.2</span><span class="bar bar-ctx"><span style="width:45.2%"></span></span></div></td><td><span class="good">+16.1</span></td><td><span class="cost-from">$42.3</span><span class="cost-arrow" aria-hidden="true">→</span>$30.3</td><td><span class="good">−28.5%</span></td></tr>
+<tr><td class="left rank sticky-a">6</td><th class="left sticky-b model-th" scope="row"><span class="model-name">Gemma 4 (31B)</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, self-hosted, thinking enabled</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">19.4</span><span class="bar bar-sym"><span style="width:19.4%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">38.7</span><span class="bar bar-ctx"><span style="width:38.7%"></span></span></div></td><td><span class="good">+19.4</span></td><td><span class="cost-from">$4.9</span><span class="cost-arrow" aria-hidden="true">→</span>$4.5</td><td><span class="good">−8.6%</span></td></tr>
+<tr><td class="left rank sticky-a">7</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GLM 4.7</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, API, thinking enabled</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">9.7</span><span class="bar bar-sym"><span style="width:9.7%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">48.4</span><span class="bar bar-ctx"><span style="width:48.4%"></span></span></div></td><td><span class="good">+38.7</span></td><td><span class="cost-from">$38.5</span><span class="cost-arrow" aria-hidden="true">→</span>$18.7</td><td><span class="good">−51.5%</span></td></tr>
+<tr><td class="left rank sticky-a">8</td><th class="left sticky-b model-th" scope="row"><span class="model-name">GPT OSS (120B BF16)</span><span class="open-tag">open</span><span class="agent-inline">mini-SWE-agent</span><span class="visually-hidden">open, self-hosted, thinking enabled</span></th><td class="left agent agent-col"><a href="https://github.com/SWE-agent/mini-swe-agent">mini-SWE-agent</a></td><td><div class="pct-wrap"><span class="pct">6.5</span><span class="bar bar-sym"><span style="width:6.5%"></span></span></div></td><td><div class="pct-wrap"><span class="pct">29.0</span><span class="bar bar-ctx"><span style="width:29%"></span></span></div></td><td><span class="good">+22.6</span></td><td><span class="cost-from">$3.7</span><span class="cost-arrow" aria-hidden="true">→</span>$3.3</td><td><span class="good">−11.5%</span></td></tr>
+</tbody></table>
       </div>
     </section>
 
     <section class="wrap section-links" aria-label="Project links">
-      <div class="link-row" id="link-row"></div>
+      <div class="link-row" id="link-row"><a class="link-btn primary" href="https://github.com/USC-NSL/DDBench">GitHub repo</a><a class="link-btn " href="https://arxiv.org/abs/2608.14863">arXiv paper</a><span class="link-btn disabled">Hugging Face dataset<small>soon</small></span></div>
     </section>
 
     <section class="wrap section" id="overview" aria-labelledby="overview-h">
@@ -155,14 +202,32 @@
           <figcaption>Models that cluster on SWE-bench spread apart here.</figcaption>
           <div class="legend" id="chart-cross-legend"></div>
           <div class="chart" id="chart-cross"></div>
-          <div class="card-foot" id="chart-cross-table"></div>
+          <div class="card-foot" id="chart-cross-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Model</th><th scope="col">SWE-bench Verified (%)</th><th scope="col">DDBench Tier 1 (%)</th></tr>
+</thead><tbody><tr><td>Claude Opus 4.6</td><td>80.8</td><td>51.6</td></tr>
+<tr><td>Claude Sonnet 4.6</td><td>79.6</td><td>41.9</td></tr>
+<tr><td>GPT 5.4</td><td>77.0</td><td>41.9</td></tr>
+<tr><td>Kimi K2.5</td><td>76.8</td><td>32.3</td></tr>
+<tr><td>GLM 5</td><td>77.8</td><td>29.0</td></tr>
+<tr><td>GLM 4.7</td><td>73.8</td><td>9.7</td></tr>
+</tbody></table></div><p class="data-source">Paper Figure 1. DDBench runs are symptom-only. The GPT 5.4 SWE-bench score is from Epoch AI; the others are vendor-reported.</p></details></div>
         </figure>
 
         <figure class="chart-card">
           <figcaption>Context lifts weak models and cuts cost for strong ones.</figcaption>
           <div class="legend" id="chart-pareto-legend"></div>
           <div class="chart" id="chart-pareto"></div>
-          <div class="card-foot" id="chart-pareto-table"></div>
+          <div class="card-foot" id="chart-pareto-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Model</th><th scope="col">Pass rate, symptom-only (%)</th><th scope="col">Pass rate, context (%)</th><th scope="col">$/case, symptom-only</th><th scope="col">$/case, context</th></tr>
+</thead><tbody><tr><td>Claude Opus 4.6</td><td>51.6</td><td>64.5</td><td>2.34</td><td>1.05</td></tr>
+<tr><td>Claude Sonnet 4.6</td><td>41.9</td><td>58.1</td><td>2.32</td><td>1.15</td></tr>
+<tr><td>GPT 5.4</td><td>41.9</td><td>67.7</td><td>0.81</td><td>0.69</td></tr>
+<tr><td>GPT 5.4 mini</td><td>45.2</td><td>61.3</td><td>0.25</td><td>0.20</td></tr>
+<tr><td>GLM 5.1 (FP8)</td><td>32.3</td><td>48.4</td><td>0.75</td><td>0.47</td></tr>
+<tr><td>GLM 5</td><td>29.0</td><td>45.2</td><td>1.36</td><td>0.98</td></tr>
+<tr><td>GLM 4.7</td><td>9.7</td><td>48.4</td><td>1.24</td><td>0.60</td></tr>
+<tr><td>Gemma 4 (31B)</td><td>19.4</td><td>38.7</td><td>0.16</td><td>0.15</td></tr>
+<tr><td>Kimi K2.5</td><td>32.3</td><td>38.7</td><td>0.36</td><td>0.24</td></tr>
+<tr><td>GPT OSS (120B BF16)</td><td>6.5</td><td>29.0</td><td>0.12</td><td>0.11</td></tr>
+</tbody></table></div><p class="data-source">Paper Table 1 and Figure 6a. Cost per case is total cost divided by 31.</p></details></div>
         </figure>
 
         <figure class="chart-card">
@@ -170,14 +235,25 @@
           <div class="legend" id="chart-lift-legend"></div>
           <div class="chart-head">Gain (pp)</div>
           <div class="chart" id="chart-lift-tier"></div>
-          <div class="card-foot" id="chart-lift-table"></div>
+          <div class="card-foot" id="chart-lift-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Tier</th><th scope="col">Symptom-only (%)</th><th scope="col">With context (%)</th><th scope="col">Gain (pp)</th></tr>
+</thead><tbody><tr><td>Tier 1 (31 cases)</td><td>31.0</td><td>50.0</td><td>+19.0</td></tr>
+<tr><td>Tier 2 (15 cases)</td><td>48.0</td><td>62.7</td><td>+14.7</td></tr>
+<tr><td>Tier 3 (14 cases)</td><td>67.9</td><td>77.1</td><td>+9.3</td></tr>
+</tbody></table></div><p class="data-source">Paper section 3.5.</p></details></div>
         </figure>
 
         <figure class="chart-card">
           <figcaption>With context, agents search less.</figcaption>
           <div class="legend" id="behaviour-legend"></div>
           <div class="tiles" id="behaviour-tiles"></div>
-          <div class="card-foot" id="behaviour-table"></div>
+          <div class="card-foot" id="behaviour-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Mean per case</th><th scope="col">Symptom-only</th><th scope="col">With context</th></tr>
+</thead><tbody><tr><td>Tokens</td><td>1.79M</td><td>0.99M</td></tr>
+<tr><td>Steps</td><td>57.6</td><td>43.1</td></tr>
+<tr><td>Steps to first edit</td><td>32.3</td><td>20.8</td></tr>
+<tr><td>Read actions</td><td>24.7</td><td>17.7</td></tr>
+<tr><td>Explore actions</td><td>10.9</td><td>6.8</td></tr>
+<tr><td>Edits</td><td>3.0</td><td>3.1</td></tr>
+</tbody></table></div><p class="data-source">Paper Table 3: 310 paired Tier 1 runs.</p></details></div>
         </figure>
       </div>
 
@@ -198,18 +274,44 @@
           <figure class="chart-card">
             <figcaption>By bug family</figcaption>
             <div class="chart" id="chart-families"></div>
-            <div class="card-foot" id="chart-families-table"></div>
+            <div class="card-foot" id="chart-families-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Bug family</th><th scope="col">Tier 1</th><th scope="col">Tier 2</th><th scope="col">Tier 3</th><th scope="col">Total</th></tr>
+</thead><tbody><tr><td>Protocol &amp; recovery</td><td>13</td><td>6</td><td>0</td><td>19</td></tr>
+<tr><td>Replication &amp; consistency</td><td>9</td><td>1</td><td>1</td><td>11</td></tr>
+<tr><td>Concurrency hazards</td><td>4</td><td>5</td><td>2</td><td>11</td></tr>
+<tr><td>Input-triggered crashes</td><td>0</td><td>0</td><td>10</td><td>10</td></tr>
+<tr><td>Resource &amp; delivery</td><td>5</td><td>3</td><td>1</td><td>9</td></tr>
+</tbody></table></div><p class="data-source">Paper Figure 5.</p></details></div>
           </figure>
           <figure class="chart-card">
             <figcaption>By language</figcaption>
             <div class="chart" id="chart-languages"></div>
-            <div class="card-foot" id="chart-languages-table"></div>
+            <div class="card-foot" id="chart-languages-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Language</th><th scope="col">Tier 1</th><th scope="col">Tier 2</th><th scope="col">Tier 3</th><th scope="col">Total</th></tr>
+</thead><tbody><tr><td>Go</td><td>16</td><td>9</td><td>0</td><td>25</td></tr>
+<tr><td>C++</td><td>5</td><td>4</td><td>14</td><td>23</td></tr>
+<tr><td>Java</td><td>8</td><td>0</td><td>0</td><td>8</td></tr>
+<tr><td>Rust</td><td>0</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>Erlang</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
+</tbody></table></div><p class="data-source">Case registry in the DDBench repository.</p></details></div>
           </figure>
         </div>
         <figure class="chart-card">
           <figcaption>By system</figcaption>
           <div class="chart" id="chart-systems"></div>
-          <div class="card-foot" id="chart-systems-table"></div>
+          <div class="card-foot" id="chart-systems-table"><details class="data-details"><summary>View data</summary><div class="table-wrap"><table><thead><tr><th scope="col">System</th><th scope="col">Tier 1</th><th scope="col">Tier 2</th><th scope="col">Tier 3</th><th scope="col">Total</th></tr>
+</thead><tbody><tr><td>Dragonfly (C++)</td><td>1</td><td>1</td><td>12</td><td>14</td></tr>
+<tr><td>NATS (Go)</td><td>5</td><td>4</td><td>0</td><td>9</td></tr>
+<tr><td>Kvrocks (C++)</td><td>4</td><td>3</td><td>1</td><td>8</td></tr>
+<tr><td>etcd (Go)</td><td>5</td><td>2</td><td>0</td><td>7</td></tr>
+<tr><td>hashicorp/raft (Go)</td><td>4</td><td>2</td><td>0</td><td>6</td></tr>
+<tr><td>Consul (Go)</td><td>2</td><td>1</td><td>0</td><td>3</td></tr>
+<tr><td>Kafka (Java)</td><td>3</td><td>0</td><td>0</td><td>3</td></tr>
+<tr><td>ZooKeeper (Java)</td><td>3</td><td>0</td><td>0</td><td>3</td></tr>
+<tr><td>BookKeeper (Java)</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
+<tr><td>raft-rs (Rust)</td><td>0</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>Ra (Erlang)</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+<tr><td>RabbitMQ (Erlang)</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+<tr><td>RocksDB (C++)</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+</tbody></table></div><p class="data-source">Case registry in the DDBench repository.</p></details></div>
         </figure>
       </div>
     </section>
@@ -217,7 +319,14 @@
     <section class="wrap section" id="compare-section" aria-labelledby="compare-h">
       <h2 id="compare-h">Compared with other benchmarks</h2>
       <div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark comparison">
-        <table class="compare" id="compare"></table>
+        <table class="compare" id="compare"><thead><tr><th scope="col">Benchmark</th><th scope="col">Cross-process</th><th scope="col">Code fix</th><th scope="col">Executable oracle</th><th scope="col">Debug context</th><th scope="col">Languages</th></tr>
+</thead><tbody><tr><th scope="row">SWE-bench Verified</th><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>unit tests</span></td><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td>1</td></tr>
+<tr><th scope="row">Multi-SWE-Bench</th><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>unit tests</span></td><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td>8</td></tr>
+<tr><th scope="row">DebugBench</th><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>unit tests</span></td><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td>3</td></tr>
+<tr><th scope="row">AIOpsLab</th><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>telemetry</span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>telemetry</span></td><td>—</td></tr>
+<tr><th scope="row">CloudOpsBench</th><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg><span class="visually-hidden">No</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>telemetry</span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>telemetry</span></td><td>—</td></tr>
+<tr class="self"><th scope="row">DDBench</th><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg><span class="visually-hidden">Yes</span></span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>E2E + unit tests</span></td><td><span class="check yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>controlled</span></td><td>5</td></tr>
+</tbody></table>
       </div>
     </section>
 
@@ -242,7 +351,7 @@
 <span class="c"># Score a patch</span>
 ./bench.sh eval raft-358-negative-log-range --patch my-fix.diff --json result.json</code></pre>
       </div>
-      <a class="link-btn run-guide" data-repo-path="blob/main/README.md" href="#">Full guide</a>
+      <a class="link-btn run-guide" data-repo-path="blob/main/README.md" href="https://github.com/USC-NSL/DDBench/blob/main/README.md">Full guide</a>
     </section>
   </main>
 
@@ -251,7 +360,7 @@
       <span>Apache-2.0</span>
       <span class="footer-links">
         <a data-repo-link="" href="https://github.com/USC-NSL/DDBench">GitHub</a>
-        <span id="footer-paper"></span>
+        <span id="footer-paper"><a href="https://arxiv.org/abs/2608.14863">Paper</a></span>
       </span>
     </div>
   </footer>
